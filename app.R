@@ -175,13 +175,13 @@ ui <- navbarPage(
                                     plotOutput("Lows")
                              ),
                              column(5, offset =2,
-                                    h3("Empirical Power (rhoA=rho)"),
+                                    h3(HTML("Empirical Power (&rho;<sub>A</sub>=&rho;)")),
                                     sliderInput("rho0sld", label = "Value under null hypothesis:",
                                                 min = 0.05, max = 0.99, step = 0.01, value = 0.8),
                                     tableOutput("PowerEst")
                              ),
                              column(5, offset =2,
-                                    h3("Empirical Coverage (rho0=rho)"),
+                                    h3(HTML("Empirical Power (&rho;<sub>0</sub>=&rho;)")),
                                     tableOutput("CvrEst")
                              ),
                          ) 
@@ -380,7 +380,7 @@ server <- function(input,output,session) {
     rownames = FALSE)
     
     output$Tmps <- renderText({
-      if (!is.null(res$SSmode) == as.numeric(input$nmax)) {
+      if (res$SS == as.numeric(input$nmax)) {
         "Warning! Sample size within supplied search range for the number of participants is not possible."
       }
     })
@@ -446,13 +446,15 @@ server <- function(input,output,session) {
     res2(MC_sim())
     
     output$Ests <- renderTable({ 
-      data.frame("&#961;"=as.numeric(input$rho1),
-                 "R"=as.numeric(input$R),
-                 "E[MSS]" = mean(res2()$MSS),
-                 "E[MSR]" = mean(res2()$MSR),
-                 "E[MSE]" = mean(res2()$MSE),
-                 "E[&#710;&#961]" = mean(res2()$ICC),
-                 check.names = FALSE)
+      data.frame(
+        "&#961;<span title='ICC for agreement (true value)'>[?]</span>" = as.numeric(input$rho1),
+        "R<span title='Ratio of rater to error variance (true value)'>[?]</span>" = as.numeric(input$R),
+        "E[MSS]<span title='Mean Squares between participants'>[?]</span>" = mean(res2()$MSS),
+        "E[MSR]<span title='Mean Squares between raters'> [?]</span>" = mean(res2()$MSR),
+        "E[MSE]<span title='Mean Square Error'>[?]</span>" = mean(res2()$MSE),
+        "E[&#710;&#961]<span title='Estimated ICC for agreement (two-way ANOVA without repititions)'>[?]</span>" = mean(res2()$ICC),
+        check.names = FALSE
+      )
     },
     sanitize.text.function = function(x) x,
     rownames = FALSE)
@@ -476,7 +478,7 @@ server <- function(input,output,session) {
     output$CvrEst <- renderTable({ 
       data.frame("&#961;0"=as.numeric(input$rho1),
                  "Coverage" = res2()$CV,
-                 "TypeI Error" = 1-res2()$CV,
+                 "Type-I Error" = 1-res2()$CV,
                  check.names = FALSE)
     },
     sanitize.text.function = function(x) x,

@@ -2,6 +2,7 @@ rm(list=ls())
 library(parallel)
 if (!require("extraDistr")) 
   install.packages("extraDistr")
+
 library(extraDistr)
 
 nclus <- max(1,detectCores()-4) 
