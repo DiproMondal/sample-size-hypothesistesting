@@ -447,11 +447,11 @@ server <- function(input,output,session) {
     
     output$Ests <- renderTable({ 
       data.frame(
-        "&#961;<span title='ICC for agreement (true value)'>[?]</span>" = as.numeric(input$rho1),
-        "R<span title='Ratio of rater to error variance (true value)'>[?]</span>" = as.numeric(input$R),
-        "E[MSS]<span title='Mean Squares between participants'>[?]</span>" = mean(res2()$MSS),
+        "&#961;<span title='ICC for agreement (true value)'> [?]</span>" = as.numeric(input$rho1),
+        "R<span title='Ratio of rater to error variance (true value)'> [?]</span>" = as.numeric(input$R),
+        "E[MSS]<span title='Mean Squares between participants'> [?]</span>" = mean(res2()$MSS),
         "E[MSR]<span title='Mean Squares between raters'> [?]</span>" = mean(res2()$MSR),
-        "E[MSE]<span title='Mean Square Error'>[?]</span>" = mean(res2()$MSE),
+        "E[MSE]<span title='Mean Square Error'> [?]</span>" = mean(res2()$MSE),
         "E[&#710;&#961]<span title='Estimated ICC for agreement (two-way ANOVA without repititions)'>[?]</span>" = mean(res2()$ICC),
         check.names = FALSE
       )
