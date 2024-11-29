@@ -460,6 +460,34 @@ pow.MLSG2 <- function(n, k, rho, R, rho.0, nsim=1e4, alpha = 0.05, seed= 0){
   return(power)
 }
 
+pow.MLSA <- function(n, k, rho, R, rho.0, nsim =1e4, alpha = 0.05, seed=0){
+  set.seed(seed)
+  sd.2.e <- 1
+  sd.2.r <- R
+  sd.2.s <- (R+1)/(1/rho-1)
+  
+  MSS <- rchisq(nsim, df=n-1)*(k*sd.2.s+sd.2.e)/(n-1)
+  MSR <- rchisq(nsim, df=k-1)*(n*sd.2.r+sd.2.e)/(k-1)
+  MSE <- rchisq(nsim, df=(n-1)*(k-1))*sd.2.e/((n-1)*(k-1))
+  
+  d2 <- k/n
+  d3 <- k-1-k/n
+  
+  
+  F.n <- function(alpha){qf(alpha, n-1, Inf)}
+  F.nk <- function(alpha){qf(alpha, n-1, k-1)}
+  F.nnk <- function(alpha){qf(alpha, n-1, (n-1)*(k-1))}
+  A<- function(alpha, F1,F2){
+    (-1+1/F.n(alpha)*F1 + (1-1/F.n(alpha)*F.nnk(alpha))* F.nnk(alpha)/F1)/(n-1 + 1/F.n(alpha)*F.nk(alpha)*F2)
+  }
+  
+  L <- sapply(1:nsim, function(x){
+    F1 <- MSS[x]/MSE[x]
+    F2 <- MSR[x]/MSE[x]
+    return(n*max(0,A(1-alpha, F1, F2))/(k+n*max(0,A(1-alpha, F1, F2))))
+  })
+  return("Power"=mean(L>rho.0))
+}
 
 pow.MLSG <- function(n, k, rho, R, rho.0, nsim =1e4, alpha = 0.05, seed=0){
   set.seed(seed)
@@ -606,6 +634,16 @@ SampleSize <- function(k,
                                     nsim = nsim,
                                     seed = seed,
                                     alpha= alpha)-power}
+  }else if(method=="MLSA"){
+    fun.pow <- function(x){pow.MLSA(n=x,
+                                    k = k,
+                                    rho = rho,
+                                    R = R,
+                                    rho.0 = rho.0,
+                                    nsim = nsim,
+                                    seed = seed,
+                                    alpha= alpha)-power}
+    
   }else if(method=="GCI"){
     fun.pow <- function(x){pow.GCI(n=x,
                                    k = k,
@@ -617,11 +655,7 @@ SampleSize <- function(k,
                                    seed = seed,
                                    alpha= alpha)-power}
   }
-  
-  #bis <- bisection(f = fun.pow,
-  #                 a = n_min,
-  #                 b = n_max,
-  #                 )
+
   bis <-tryCatch({
     bisection(f = fun.pow,
               a = n_min,
@@ -708,6 +742,7 @@ SampleSize.wrap<- function(k,
                          "bisection",
                          "pow.VPF",
                          "pow.Wmat",
+                         "pow.MLSA",
                          "pow.MLSG",
                          "pow.GCI",
                          "pow.VPB",

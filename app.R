@@ -7,44 +7,51 @@ ui <- navbarPage(
                        fluidRow(
                          column(4, offset = 2, h1("Choose method"),
                                 radioButtons("CIMet", label = NULL,
-                                             choices = c("Wmat",
-                                                         "MLSG", 
-                                                         "GCI",
-                                                         "VPF",
-                                                         "VPB"),
-                                             selected = "VPF")
+                                             choices = c("Delta method and matrix formulation",
+                                                         "Modified large sample based on a transformation of the ICC",
+                                                         "Modified large sample based on ratios of variance components", 
+                                                         "Generalized confidence interval",
+                                                         "Variance partitioning confidence interval using an F-distribution",
+                                                         "Variance partitioning confidence interval using a beta-distribution"),
+                                             selected = "Variance partitioning confidence interval using an F-distribution")
                          )
                        ),## close fluidrow
                        fluidRow(
                          column(6, offset = 2, h2("Description"),
                                 mainPanel(
                                   conditionalPanel(
-                                    condition = "input.CIMet=='Wmat'",
-                                    p("This is the confidence interval based on delta method with matrix formulation introduced by",
+                                    condition = "input.CIMet=='Delta method and matrix formulation'",
+                                    p("This is the confidence interval based on delta method with matrix formulation (Wmat) introduced by",
                                       HTML("<a href='https://www.tandfonline.com/doi/full/10.1080/03610918.2021.1897624'>Almehrizi and Emam</a>"), "."),
                                     p("Sample size for this method is based on closed form expression of the power function given in Mondal et al.")
                                   ),
                                   conditionalPanel(
-                                    condition = "input.CIMet=='MLSG'",
-                                    p("This is the modified large sample confidence interval based on ratios of variance components introduced by",
+                                    condition = "input.CIMet=='Modified large sample based on a transformation of the ICC'",
+                                    p("This is the modified large sample confidence interval based on ratios of variance components (MLSA) introduced by",
+                                      HTML("<a href='https://www.tandfonline.com/doi/pdf/10.1080/03610928208828338'>Arteaga et al.</a>"), "."),
+                                    p("Sample size for this method is based on simulations following Mondal et al.")
+                                  ),
+                                  conditionalPanel(
+                                    condition = "input.CIMet=='Modified large sample based on ratios of variance components'",
+                                    p("This is the modified large sample confidence interval based on ratios of variance components (MLSG) introduced by",
                                       HTML("<a href='https://doi.org/10.1002/sim.1402'>Cappelleri and Ting</a>"), "."),
                                     p("Sample size for this method is based on simulations following Mondal et al.")
                                   ),
                                   conditionalPanel(
-                                    condition = "input.CIMet=='GCI'",
-                                    p("This is the generalized confidence interval introduced by",
+                                    condition = "input.CIMet=='Generalized confidence interval'",
+                                    p("This is the generalized confidence interval (GCI) introduced by",
                                       HTML("<a href='https://doi.org/10.1002/sim.1782'>Tian and Cappelleri</a>"), "."),
                                     p("Sample size for this method is based on simulations following Mondal et al.")
                                   ),
                                   conditionalPanel(
-                                    condition = "input.CIMet=='VPF'",
-                                    p("This is based on the variance partitioning confidence interval using an F-distribution introduced by",
+                                    condition = "input.CIMet=='Variance partitioning confidence interval using an F-distribution'",
+                                    p("This is based on the variance partitioning confidence interval using an F-distribution (VPF) introduced by",
                                       HTML("<a href='https://doi.org/10.1177/0962280214522787'>Demetrashvili et al.</a>"), "."),
                                     p("Sample size for this method is based on closed form expression of the power function given in Mondal et al.")
                                   ),
                                   conditionalPanel(
-                                    condition = "input.CIMet=='VPB'",
-                                    p("This is based on the variance partitioning confidence interval using an beta-distribution introduced by",
+                                    condition = "input.CIMet=='Variance partitioning confidence interval using a beta-distribution'",
+                                    p("This is based on the variance partitioning confidence interval using an beta-distribution (VPB) introduced by",
                                       HTML("<a href='https://doi.org/10.1177/0962280214522787'>Demetrashvili et al.</a>"), "."),
                                     p("Sample size for this method is based on simulations following Mondal et al.")
                                   )
@@ -79,21 +86,28 @@ ui <- navbarPage(
                          ),
                          mainPanel(
                            conditionalPanel(
-                             condition = "input.CIMet=='MLSG'",
+                             condition = "input.CIMet=='Modified large sample based on a transformation of the ICC'",
+                             numericInput("nsimMLSA", label = "Number of simulations to calculate the power:",
+                                          min = 10, max=1e6, step=10, value = 1e3),
+                             numericInput("repeatsMLSA", label = "Repeat the sample size procedure several times:",
+                                          min = 10, max=1e4, step=1, value = 10),
+                           ),
+                           conditionalPanel(
+                             condition = "input.CIMet=='Modified large sample based on ratios of variance components'",
                              numericInput("nsimMLSG", label = "Number of simulations to calculate the power:",
                                           min = 10, max=1e6, step=10, value = 1e3),
                              numericInput("repeatsMLSG", label = "Repeat the sample size procedure several times:",
                                           min = 10, max=1e4, step=1, value = 10),
                            ),
                            conditionalPanel(
-                             condition = "input.CIMet=='VPB'",
+                             condition = "input.CIMet=='Variance partitioning confidence interval using a beta-distribution'",
                              numericInput("nsimVPB", label = "Number of simulations to calculate the power:",
                                           min = 10, max=1e6, step=10, value = 1e3),
                              numericInput("repeatsVPB", label = "Repeat the sample size procedure several times:",
                                           min = 10, max=1e4, step=1, value = 10),
                            ),
                            conditionalPanel(
-                             condition = "input.CIMet=='GCI'",
+                             condition = "input.CIMet=='Generalized confidence interval'",
                              numericInput("nsimGCIW", label = "Number of simulations to calculate confidence interval (using Rao-Blackwellization):",
                                           min = 10, max=1e6, step=10, value = 1e2),
                              numericInput("nsimGCIO", label = "Number of simulations to calculate the power:",
@@ -105,6 +119,9 @@ ui <- navbarPage(
                              column(6, offset =2, 
                                     h3("Sample Size Table"),
                                     tableOutput("sampleSizeTable")
+                             ),
+                             column(6, offset = 2,
+                                    div(textOutput("Tmps"), style = "color:red")
                              ),
                              column(6, offset =2,
                                     plotOutput("sampleSizePlot")
@@ -133,14 +150,14 @@ ui <- navbarPage(
                                       sliderInput("alpha1", label = "Confidence level",
                                                   min = 0.8, max = 0.99, step = 0.01, value = 0.95),
                                       radioButtons("CIMet1", label = NULL,
-                                                   choices = c("Wmat",
+                                                   choices = c("Delta method and matrix formulation",
                                                                "ASN",
-                                                               "MLSA",
-                                                               "MLSG", 
-                                                               "GCI",
-                                                               "VPF",
-                                                               "VPB"),
-                                                   selected = "MLSG"),
+                                                               "Modified large sample based on a transformation of the ICC",
+                                                               "Modified large sample based on ratios of variance components", 
+                                                               "Generalized confidence interval",
+                                                               "Variance partitioning confidence interval using an F-distribution",
+                                                               "Variance partitioning confidence interval using a beta-distribution"),
+                                                   selected = "Modified large sample based on ratios of variance components"),
                                       numericInput("seed", label = "Seed:",
                                                    min = 1, max=1e7, step=1, value = 124),
                                       actionButton("Simulate", "Simulate")
@@ -190,7 +207,7 @@ server <- function(input,output,session) {
       nmax   <- as.numeric(input$nmax)
       mult   <- FALSE
 
-      if(input$CIMet == 'Wmat'){
+      if(input$CIMet == 'Delta method and matrix formulation'){
         SS <- SampleSize(k      = k,
                          rho    = rhoA,
                          rho.0  = rho0,
@@ -202,7 +219,7 @@ server <- function(input,output,session) {
                          method = "Wmat"
         )[['bisection']][['final']]
         
-      }else if(input$CIMet == 'MLSG'){
+      }else if(input$CIMet == 'Modified large sample based on ratios of variance components'){
         if(as.numeric(input$repeatsMLSG)==1){
           SS <- SampleSize(k      = k,
                            rho    = rhoA,
@@ -230,8 +247,36 @@ server <- function(input,output,session) {
                                 reps   = as.numeric(input$repeatsMLSG) 
           )
         }
+        }else if(input$CIMet == 'Modified large sample based on a transformation of the ICC'){
+          if(as.numeric(input$repeatsMLSA)==1){
+            SS <- SampleSize(k      = k,
+                             rho    = rhoA,
+                             rho.0  = rho0,
+                             R      = R,
+                             power  = power,
+                             n_max  = nmax,
+                             n_min  = nmin,
+                             alpha  = alpha,
+                             method = "MLSA",
+                             nsim   = as.numeric(input$nsimMLSA)
+            )[['bisection']][['final']]
+          }else{
+            mult <- TRUE
+            SS <- SampleSize.wrap(k      = k,
+                                  rho    = rhoA,
+                                  rho.0  = rho0,
+                                  R      = R,
+                                  power  = power,
+                                  n_max  = nmax,
+                                  n_min  = nmin,
+                                  alpha  = alpha,
+                                  method = "MLSA",
+                                  nsim   = as.numeric(input$nsimMLSA),
+                                  reps   = as.numeric(input$repeatsMLSA) 
+            )
+          }
         
-      }else if(input$CIMet == 'GCI'){
+      }else if(input$CIMet == 'Generalized confidence interval'){
         if(as.numeric(input$repeatsGCI)==1){
           SS <- SampleSize(k      = k,
                            rho    = rhoA,
@@ -255,14 +300,14 @@ server <- function(input,output,session) {
                                 n_max  = nmax,
                                 n_min  = nmin,
                                 alpha  = alpha,
-                                method = "MLSG",
+                                method = "GCI",
                                 nsim   = as.numeric(input$nsimGCIO),
                                 nsimW  = as.numeric(input$nsimGCIW), 
                                 reps   = as.numeric(input$repeatsGCI) 
           )
         }
         
-      }else if(input$CIMet == 'VPF'){
+      }else if(input$CIMet == 'Variance partitioning confidence interval using an F-distribution'){
         SS <- SampleSize(k      = k,
                          rho    = rhoA,
                          rho.0  = rho0,
@@ -274,7 +319,7 @@ server <- function(input,output,session) {
                          method = "VPF"
         )[['bisection']][['final']]
         
-      }else if(input$CIMet == 'VPB'){
+      }else if(input$CIMet == 'Variance partitioning confidence interval using a beta-distribution'){
         if(as.numeric(input$repeatsVPB)==1){
           SS <- SampleSize(k      = k,
                            rho    = rhoA,
@@ -333,6 +378,12 @@ server <- function(input,output,session) {
     },
     sanitize.text.function = function(x) x,
     rownames = FALSE)
+    
+    output$Tmps <- renderText({
+      if (!is.null(res$SSmode) == as.numeric(input$nmax)) {
+        "Warning! Sample size within supplied search range for the number of participants is not possible."
+      }
+    })
     
     output$sampleSizePlot <- renderPlot({
       if (res$mult == TRUE) {
@@ -393,6 +444,7 @@ server <- function(input,output,session) {
     },
     sanitize.text.function = function(x) x,
     rownames = FALSE)
+    
     
     
     output$ICCest <- renderPlot({
