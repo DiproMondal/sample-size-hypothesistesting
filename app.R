@@ -151,7 +151,7 @@ ui <- navbarPage(
                                                   min = 0.8, max = 0.99, step = 0.01, value = 0.95),
                                       radioButtons("CIMet1", label = NULL,
                                                    choices = c("Delta method and matrix formulation",
-                                                               "ASN",
+                                                               "Asymptotic confidence interval",
                                                                "Modified large sample based on a transformation of the ICC",
                                                                "Modified large sample based on ratios of variance components", 
                                                                "Generalized confidence interval",
@@ -400,9 +400,21 @@ server <- function(input,output,session) {
       R <- as.numeric(input$R1)
       rho <- as.numeric(input$rho1)
       nsims <- as.numeric(input$nsims)
-      CIMet <- as.character(input$CIMet1)
+      met <- as.character(input$CIMet1)
       seed  <- as.numeric(input$seed)
       alpha <- 1-as.numeric(input$alpha1)
+      
+      metdstxt <-  c("Delta method and matrix formulation",
+                     "Asymptotic confidence interval",
+                     "Modified large sample based on a transformation of the ICC",
+                     "Modified large sample based on ratios of variance components", 
+                     "Generalized confidence interval",
+                     "Variance partitioning confidence interval using an F-distribution",
+                     "Variance partitioning confidence interval using a beta-distribution")
+      metds <- c("Wmat", "ASN", "MLSA", "MLSG", "GCI", "VPF", "VPB")
+      metdsmap <- setNames(metds, metdstxt)
+      
+      CIMet <- metdsmap[[met]]
       
       gm  <- gen(n = n,
                  k = k,
