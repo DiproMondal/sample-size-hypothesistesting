@@ -349,7 +349,8 @@ server <- function(input,output,session) {
       #multp <- ifelse(mult()=="TRUE",TRUE,FALSE)
       return(list(SS   = SS,
                   SSmode = if(mult()=="TRUE"){
-                    as.numeric(names(sort(table(SS), decreasing = TRUE))[1])
+                    #as.numeric(names(sort(table(SS), decreasing = TRUE))[1]) ## Mode
+                    sum(sapply(1:length(table(SS)), function(x) table(SS)[[x]]*as.integer(names(table(SS))[x])))/sum(table(SS))## Weighted mean
                   }else{
                     SS
                     },
@@ -377,7 +378,7 @@ server <- function(input,output,session) {
     rownames = FALSE)
     
     output$Tmps <- renderText({
-      if (res$SSmode == as.numeric(input$nmax)|| any$SS == as.numeric(input$nmax)) {
+      if (res$SSmode == as.numeric(input$nmax)) {
         "Warning! Sample size within supplied search range for the number of participants is not possible."
       }
     })
