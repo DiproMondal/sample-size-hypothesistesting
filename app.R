@@ -344,9 +344,8 @@ server <- function(input,output,session) {
              h3("Sample Size Table"),
              tableOutput("sampleSizeTable")
       )})
-      print(SS)
-      print(mult)
-      #multp <- ifelse(mult()=="TRUE",TRUE,FALSE)
+
+
       return(list(SS   = SS,
                   SSmode = if(mult()=="TRUE"){
                     #as.numeric(names(sort(table(SS), decreasing = TRUE))[1]) ## Mode
@@ -419,7 +418,7 @@ server <- function(input,output,session) {
               class = "panel-body",
               tabsetPanel(
                 column(7, h4(HTML(
-                  "For hypothesis testing on the ICC for agreement (&rho;): \\( \\mathcal{H}_0 : \\rho = \\rho_0 \\) vs \\( \\mathcal{H}_A : \\rho > \\rho_0 \\)"
+                  "For hypothesis testing on the ICC for agreement (&rho;): \\( \\mathcal{H}_0 : \\rho = \\rho_0 \\) vs \\( \\mathcal{H}_A : \\rho \\geq \\rho_0 \\)"
                 ), withMathJax()),
                 h5(HTML("(&rho;<sub>0</sub> and &rho;<sub>A</sub> are values of ICC for agreement under \\(\\mathcal{H}_0\\) and \\(\\mathcal{H}_A\\))"), withMathJax())),
                 column(6, offset = 1, h4(HTML("Empirical Coverage")),
