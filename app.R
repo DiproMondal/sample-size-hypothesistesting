@@ -80,8 +80,6 @@ ui <- navbarPage(
                                         min = 4, max = 1000, step = 1, value = 4),
                            numericInput("nmax", label = "Acceptable maximum number of participants",
                                         min = 10, max = 10000, step = 1, value = 1000),
-                           numericInput("R", label = "Rater to error variance ratio",
-                                        min = 0.001, max = 100, step = 0.001, value = 0.1),
                            actionButton("computeSS", "Calculate Sample Size")
                          ),
                          mainPanel(
@@ -116,10 +114,7 @@ ui <- navbarPage(
                                           min = 10, max=1e4, step=1, value = 10),
                            ),
                            fluidRow(
-                             column(6, offset =2, 
-                                    h3("Sample Size Table"),
-                                    tableOutput("sampleSizeTable")
-                             ),
+                             uiOutput("SampTable"),
                              column(6, offset = 2,
                                     div(textOutput("Tmps"), style = "color:red")
                              ),
@@ -137,13 +132,13 @@ ui <- navbarPage(
               tabPanel(title = strong("Simulation"),
                        sidebarLayout(
                          sidebarPanel("Parameter Specification",
-                                      numericInput("np", label = "Number of participants:",
+                                      numericInput("np", label = HTML("Number of participants (n):"),
                                                    min = 10, max=1e6, step=1, value = 20),
-                                      numericInput("nk", label = "Number of raters:",
+                                      numericInput("nk", label = HTML("Number of raters (k):"),
                                                    min = 2, max = 100, step=1, value=3),
-                                      numericInput("R1", label = "Rater to error variance ratio",
+                                      numericInput("R1", label = HTML("Rater to error variance ratio (R)"),
                                                    min = 0.001, max = 100, step = 0.001, value = 0.1),
-                                      sliderInput("rho1", label = "Value for ICC for agreement:",
+                                      sliderInput("rho1", label = HTML("Value for ICC for agreement (&rho;):"),
                                                   min = 0.05, max = 0.99, step = 0.01, value = 0.8),
                                       numericInput("nsims", label = "Number of simulations:",
                                                    min = 100, max=1e6, step=100, value = 1e4),
@@ -164,26 +159,14 @@ ui <- navbarPage(
                          ),
                          mainPanel(
                            fluidRow(
-                             column(6, offset =2, 
-                                    h3("Estimated Quantities"),
-                                    tableOutput("Ests")
-                             ),
+                             uiOutput("Qprint"),
                              column(6,
                                     plotOutput("ICCest")
                              ),
                              column(6,
                                     plotOutput("Lows")
                              ),
-                             column(5, offset =2,
-                                    h3(HTML("Empirical Power (&rho;<sub>A</sub>=&rho;)")),
-                                    sliderInput("rho0sld", label = "Value under null hypothesis:",
-                                                min = 0.05, max = 0.99, step = 0.01, value = 0.8),
-                                    tableOutput("PowerEst")
-                             ),
-                             column(5, offset =2,
-                                    h3(HTML("Empirical Power (&rho;<sub>0</sub>=&rho;)")),
-                                    tableOutput("CvrEst")
-                             ),
+                             uiOutput("collapsibleContent")
                          ) 
                        ))
                        
@@ -205,7 +188,8 @@ server <- function(input,output,session) {
       k      <- as.numeric(input$k) 
       nmin   <- as.numeric(input$nmin)
       nmax   <- as.numeric(input$nmax)
-      mult   <- FALSE
+      mult   <- reactiveVal()
+      
 
       if(input$CIMet == 'Delta method and matrix formulation'){
         SS <- SampleSize(k      = k,
@@ -221,6 +205,7 @@ server <- function(input,output,session) {
         
       }else if(input$CIMet == 'Modified large sample based on ratios of variance components'){
         if(as.numeric(input$repeatsMLSG)==1){
+          mult(FALSE)
           SS <- SampleSize(k      = k,
                            rho    = rhoA,
                            rho.0  = rho0,
@@ -233,7 +218,7 @@ server <- function(input,output,session) {
                            nsim   = as.numeric(input$nsimMLSG)
           )[['bisection']][['final']]
         }else{
-          mult <- TRUE
+          mult(TRUE)
           SS <- SampleSize.wrap(k      = k,
                                 rho    = rhoA,
                                 rho.0  = rho0,
@@ -249,6 +234,7 @@ server <- function(input,output,session) {
         }
         }else if(input$CIMet == 'Modified large sample based on a transformation of the ICC'){
           if(as.numeric(input$repeatsMLSA)==1){
+            mult(FALSE)
             SS <- SampleSize(k      = k,
                              rho    = rhoA,
                              rho.0  = rho0,
@@ -261,7 +247,7 @@ server <- function(input,output,session) {
                              nsim   = as.numeric(input$nsimMLSA)
             )[['bisection']][['final']]
           }else{
-            mult <- TRUE
+            mult(TRUE)
             SS <- SampleSize.wrap(k      = k,
                                   rho    = rhoA,
                                   rho.0  = rho0,
@@ -278,6 +264,7 @@ server <- function(input,output,session) {
         
       }else if(input$CIMet == 'Generalized confidence interval'){
         if(as.numeric(input$repeatsGCI)==1){
+          mult(FALSE)
           SS <- SampleSize(k      = k,
                            rho    = rhoA,
                            rho.0  = rho0,
@@ -291,7 +278,7 @@ server <- function(input,output,session) {
                            nsimW  = as.numeric(input$nsimGCIW) 
           )[['bisection']][['final']]
         }else{
-          mult <- TRUE
+          mult(TRUE)
           SS <- SampleSize.wrap(k      = k,
                                 rho    = rhoA,
                                 rho.0  = rho0,
@@ -321,6 +308,7 @@ server <- function(input,output,session) {
         
       }else if(input$CIMet == 'Variance partitioning confidence interval using a beta-distribution'){
         if(as.numeric(input$repeatsVPB)==1){
+          mult(FALSE)
           SS <- SampleSize(k      = k,
                            rho    = rhoA,
                            rho.0  = rho0,
@@ -333,7 +321,7 @@ server <- function(input,output,session) {
                            nsim   = as.numeric(input$nsimVPB)
                            )[['bisection']][['final']]
         }else{
-          mult <- TRUE
+          mult(TRUE)
           SS <- SampleSize.wrap(k      = k,
                                 rho    = rhoA,
                                 rho.0  = rho0,
@@ -351,11 +339,20 @@ server <- function(input,output,session) {
         
       }
 
+      output$SampTable <- renderUI({
+        column(6, offset =2, 
+             h3("Sample Size Table"),
+             tableOutput("sampleSizeTable")
+      )})
       print(SS)
+      print(mult)
+      #multp <- ifelse(mult()=="TRUE",TRUE,FALSE)
       return(list(SS   = SS,
-                  SSmode = ifelse(mult==TRUE,
-                                  as.numeric(names(sort(table(SS), decreasing = TRUE))[1]),
-                                  SS),
+                  SSmode = if(mult()=="TRUE"){
+                    as.numeric(names(sort(table(SS), decreasing = TRUE))[1])
+                  }else{
+                    SS
+                    },
                   rhoA = rhoA,
                   rho0 = rho0,
                   R    = R,
@@ -380,20 +377,62 @@ server <- function(input,output,session) {
     rownames = FALSE)
     
     output$Tmps <- renderText({
-      if (res$SS == as.numeric(input$nmax)) {
+      if (res$SSmode == as.numeric(input$nmax)|| any$SS == as.numeric(input$nmax)) {
         "Warning! Sample size within supplied search range for the number of participants is not possible."
       }
     })
     
     output$sampleSizePlot <- renderPlot({
-      if (res$mult == TRUE) {
+      if (res$mult() == "TRUE") {
         hist(res$SS, main = "Distribution of Sample Sizes",
              xlab = "Sample Sizes", border = "white")
       }
     })
   })
   
+
+  
+  
   observeEvent(input$Simulate, {
+    output$Qprint <- renderUI({
+      column(6, offset =2, 
+         h3("Estimated Quantities"),
+         tableOutput("Ests"))
+    })
+    output$collapsibleContent <- renderUI({
+        tags$div(
+          class = "panel panel-default", # Bootstrap panel styling
+          tags$div(
+            class = "panel-heading",
+            tags$a(
+              class = "btn btn-primary", # Makes it look like a button
+              "data-toggle" = "collapse",
+              "href" = "#collapseTabsetPanel", # Link to the collapsible content
+              "Additional quantities for hypothesis testing"
+            )
+          ),
+          tags$div(
+            id = "collapseTabsetPanel",
+            class = "panel-collapse collapse", # Collapsible content class
+            tags$div(
+              class = "panel-body",
+              tabsetPanel(
+                column(7, h4(HTML(
+                  "For hypothesis testing on the ICC for agreement (&rho;): \\( \\mathcal{H}_0 : \\rho = \\rho_0 \\) vs \\( \\mathcal{H}_A : \\rho > \\rho_0 \\)"
+                ), withMathJax()),
+                h5(HTML("(&rho;<sub>0</sub> and &rho;<sub>A</sub> are values of ICC for agreement under \\(\\mathcal{H}_0\\) and \\(\\mathcal{H}_A\\))"), withMathJax())),
+                column(6, offset = 1, h4(HTML("Empirical Coverage")),
+                       h5(HTML("Consider the specified ICC for agreement is the value under null hypothesis (&rho;<sub>0</sub>)")),
+                       tableOutput("CvrEst")),
+                column(6, offset = 1, h4(HTML("Empirical Power")),
+                       h5(HTML("Consider the specified ICC for agreement is the value under alternate hypothesis (&rho;<sub>A</sub>)")),
+                       sliderInput("rho0sld", label = "Value under null hypothesis:", min = 0.05, max = 0.99, step = 0.01, value = 0.8),
+                       tableOutput("PowerEst"))
+              )
+            )
+          )
+        )
+    })
     MC_sim <- function(){
       n <- as.numeric(input$np)
       k <- as.numeric(input$nk)
@@ -416,12 +455,16 @@ server <- function(input,output,session) {
       
       CIMet <- metdsmap[[met]]
       
+      
+      
+      
       gm  <- gen(n = n,
                  k = k,
                  rho = rho,
                  R   = R,
                  nsim = nsims)
       sim <- 
+        withProgress(message = 'Computing', style = 'notification', value = 0, {
         MC_SimL(n = n,
               k = k,
               rho = rho,
@@ -430,6 +473,7 @@ server <- function(input,output,session) {
               nsim   = nsims,
               alpha  = alpha,
               seed   = seed)
+        })
       coverage <-
         round(length(sim[sim<rho])/nsims,3)
       
@@ -447,16 +491,17 @@ server <- function(input,output,session) {
     
     output$Ests <- renderTable({ 
       data.frame(
-        "&#961;<span title='ICC for agreement (true value)'> [?]</span>" = as.numeric(input$rho1),
-        "R<span title='Ratio of rater to error variance (true value)'> [?]</span>" = as.numeric(input$R),
-        "E[MSS]<span title='Mean Squares between participants'> [?]</span>" = mean(res2()$MSS),
-        "E[MSR]<span title='Mean Squares between raters'> [?]</span>" = mean(res2()$MSR),
-        "E[MSE]<span title='Mean Square Error'> [?]</span>" = mean(res2()$MSE),
+        "&#961;<span title='ICC for agreement (specified value)'>[?]</span>" = as.numeric(input$rho1),
+        "R<span title='Ratio of rater to error variance (specified value)'>[?]</span>" = as.numeric(input$R),
+        "E[MSS]<span title='Mean Squares between participants'>[?]</span>" = mean(res2()$MSS),
+        "E[MSR]<span title='Mean Squares between raters'>[?]</span>" = mean(res2()$MSR),
+        "E[MSE]<span title='Mean Square Error'>[?]</span>" = mean(res2()$MSE),
         "E[&#710;&#961]<span title='Estimated ICC for agreement (two-way ANOVA without repititions)'>[?]</span>" = mean(res2()$ICC),
         check.names = FALSE
       )
     },
-    sanitize.text.function = function(x) x,
+    escape = FALSE,
+    sanitize.text.function = identity,
     rownames = FALSE)
     
     
