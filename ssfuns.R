@@ -748,9 +748,10 @@ SampleSize.wrap<- function(k,
                          "pow.MLSG",
                          "pow.GCI",
                          "pow.VPB",
-                         "SampleSize"),
+                         "SampleSize",
+                         "pinvchisq"),
                 envir = environment())
-  clusterEvalQ(cl, library(extraDistr))
+
   ss <- parSapply(cl, 1:reps, function(x){
     SampleSize(k      = k, 
                rho    = rho, 
