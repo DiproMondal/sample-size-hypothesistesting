@@ -7,7 +7,6 @@ library(extraDistr)
 
 nclus <- max(1,detectCores()-4) 
 
-
 gen<-function(n,k,rho, R, nsim=1e4){
   sd.2.e <- 1 
   sd.2.r <- R
@@ -726,8 +725,25 @@ SampleSize.wrap<- function(k,
                            nsimW=100,
                            n_min=4,
                            reps =10){
+  ss<-c
+  if(nclus==1){
+    ss <- sapply(1:reps, function(x){
+      SampleSize(k      = k, 
+                 rho    = rho, 
+                 R      = R, 
+                 rho.0  = rho.0, 
+                 alpha  = alpha,
+                 nsim   = nsim, 
+                 power  = power, 
+                 seed   = seed+x, 
+                 method = method, 
+                 n_max  = n_max, 
+                 nsimW  = nsimW,
+                 n_min  = n_min)[['bisection']][['final']]
+      
+    })
+  }else{
   cl <- makeCluster(nclus, outfile= 'temp.txt')
-  
   
   clusterExport(cl, list("k",
                          "rho",
@@ -767,7 +783,8 @@ SampleSize.wrap<- function(k,
                n_min  = n_min)[['bisection']][['final']]
 
   })
-  on.exit(stopCluster(cl), add = TRUE)
+  stopCluster(cl)
+  }
   return(ss)
 }
 

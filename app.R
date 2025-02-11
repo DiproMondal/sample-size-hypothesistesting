@@ -86,30 +86,30 @@ ui <- navbarPage(
                            conditionalPanel(
                              condition = "input.CIMet=='Modified large sample based on a transformation of the ICC'",
                              numericInput("nsimMLSA", label = "Number of simulations to calculate the power:",
-                                          min = 10, max=1e6, step=10, value = 1e3),
+                                          min = 100, max=1e6, step=10, value = 1e3),
                              numericInput("repeatsMLSA", label = "Repeat the sample size procedure several times:",
                                           min = 10, max=1e4, step=1, value = 10),
                            ),
                            conditionalPanel(
                              condition = "input.CIMet=='Modified large sample based on ratios of variance components'",
                              numericInput("nsimMLSG", label = "Number of simulations to calculate the power:",
-                                          min = 10, max=1e6, step=10, value = 1e3),
+                                          min = 100, max=1e6, step=10, value = 1e3),
                              numericInput("repeatsMLSG", label = "Repeat the sample size procedure several times:",
                                           min = 10, max=1e4, step=1, value = 10),
                            ),
                            conditionalPanel(
                              condition = "input.CIMet=='Variance partitioning confidence interval using a beta-distribution'",
                              numericInput("nsimVPB", label = "Number of simulations to calculate the power:",
-                                          min = 10, max=1e6, step=10, value = 1e3),
+                                          min = 100, max=1e6, step=10, value = 1e3),
                              numericInput("repeatsVPB", label = "Repeat the sample size procedure several times:",
                                           min = 10, max=1e4, step=1, value = 10),
                            ),
                            conditionalPanel(
                              condition = "input.CIMet=='Generalized confidence interval'",
                              numericInput("nsimGCIW", label = "Number of simulations to calculate confidence interval (using Rao-Blackwellization):",
-                                          min = 10, max=1e6, step=10, value = 1e2),
+                                          min = 100, max=1e6, step=10, value = 1e2),
                              numericInput("nsimGCIO", label = "Number of simulations to calculate the power:",
-                                          min = 10, max=1e6, step=10, value = 1e2),
+                                          min = 100, max=1e6, step=10, value = 1e2),
                              numericInput("repeatsGCI", label = "Repeat the sample size procedure several times:",
                                           min = 10, max=1e4, step=1, value = 10),
                            ),
@@ -192,7 +192,8 @@ server <- function(input,output,session) {
       
 
       if(input$CIMet == 'Delta method and matrix formulation'){
-        SS <- SampleSize(k      = k,
+        SS <- withProgress(message = 'Computing', style = 'notification', value = 0, {
+          SampleSize(k      = k,
                          rho    = rhoA,
                          rho.0  = rho0,
                          R      = R,
@@ -202,11 +203,13 @@ server <- function(input,output,session) {
                          alpha  = alpha,
                          method = "Wmat"
         )[['bisection']][['final']]
+          })
         
       }else if(input$CIMet == 'Modified large sample based on ratios of variance components'){
         if(as.numeric(input$repeatsMLSG)==1){
           mult(FALSE)
-          SS <- SampleSize(k      = k,
+          SS <- withProgress(message = 'Computing', style = 'notification', value = 0, {
+            SampleSize(k      = k,
                            rho    = rhoA,
                            rho.0  = rho0,
                            R      = R,
@@ -217,9 +220,11 @@ server <- function(input,output,session) {
                            method = "MLSG",
                            nsim   = as.numeric(input$nsimMLSG)
           )[['bisection']][['final']]
+            })
         }else{
           mult(TRUE)
-          SS <- SampleSize.wrap(k      = k,
+          SS <- withProgress(message = 'Computing', style = 'notification', value = 0, {
+            SampleSize.wrap(k      = k,
                                 rho    = rhoA,
                                 rho.0  = rho0,
                                 R      = R,
@@ -230,12 +235,13 @@ server <- function(input,output,session) {
                                 method = "MLSG",
                                 nsim   = as.numeric(input$nsimMLSG),
                                 reps   = as.numeric(input$repeatsMLSG) 
-          )
+          )})
         }
         }else if(input$CIMet == 'Modified large sample based on a transformation of the ICC'){
           if(as.numeric(input$repeatsMLSA)==1){
             mult(FALSE)
-            SS <- SampleSize(k      = k,
+            SS <- withProgress(message = 'Computing', style = 'notification', value = 0, {
+              SampleSize(k      = k,
                              rho    = rhoA,
                              rho.0  = rho0,
                              R      = R,
@@ -245,10 +251,11 @@ server <- function(input,output,session) {
                              alpha  = alpha,
                              method = "MLSA",
                              nsim   = as.numeric(input$nsimMLSA)
-            )[['bisection']][['final']]
+            )[['bisection']][['final']]})
           }else{
             mult(TRUE)
-            SS <- SampleSize.wrap(k      = k,
+            SS <- withProgress(message = 'Computing', style = 'notification', value = 0, {
+              SampleSize.wrap(k      = k,
                                   rho    = rhoA,
                                   rho.0  = rho0,
                                   R      = R,
@@ -259,13 +266,14 @@ server <- function(input,output,session) {
                                   method = "MLSA",
                                   nsim   = as.numeric(input$nsimMLSA),
                                   reps   = as.numeric(input$repeatsMLSA) 
-            )
+            )})
           }
         
       }else if(input$CIMet == 'Generalized confidence interval'){
         if(as.numeric(input$repeatsGCI)==1){
           mult(FALSE)
-          SS <- SampleSize(k      = k,
+          SS <- withProgress(message = 'Computing', style = 'notification', value = 0, {
+            SampleSize(k      = k,
                            rho    = rhoA,
                            rho.0  = rho0,
                            R      = R,
@@ -277,9 +285,11 @@ server <- function(input,output,session) {
                            nsim   = as.numeric(input$nsimGCIO),
                            nsimW  = as.numeric(input$nsimGCIW) 
           )[['bisection']][['final']]
+            })
         }else{
           mult(TRUE)
-          SS <- SampleSize.wrap(k      = k,
+          SS <- withProgress(message = 'Computing', style = 'notification', value = 0, {
+            SampleSize.wrap(k      = k,
                                 rho    = rhoA,
                                 rho.0  = rho0,
                                 R      = R,
@@ -291,11 +301,12 @@ server <- function(input,output,session) {
                                 nsim   = as.numeric(input$nsimGCIO),
                                 nsimW  = as.numeric(input$nsimGCIW), 
                                 reps   = as.numeric(input$repeatsGCI) 
-          )
+          )})
         }
         
       }else if(input$CIMet == 'Variance partitioning confidence interval using an F-distribution'){
-        SS <- SampleSize(k      = k,
+        SS <- withProgress(message = 'Computing', style = 'notification', value = 0, {
+          SampleSize(k      = k,
                          rho    = rhoA,
                          rho.0  = rho0,
                          R      = R,
@@ -305,11 +316,13 @@ server <- function(input,output,session) {
                          alpha  = alpha,
                          method = "VPF"
         )[['bisection']][['final']]
+        })
         
       }else if(input$CIMet == 'Variance partitioning confidence interval using a beta-distribution'){
         if(as.numeric(input$repeatsVPB)==1){
           mult(FALSE)
-          SS <- SampleSize(k      = k,
+          SS <- withProgress(message = 'Computing', style = 'notification', value = 0, {
+            SampleSize(k      = k,
                            rho    = rhoA,
                            rho.0  = rho0,
                            R      = R,
@@ -320,9 +333,11 @@ server <- function(input,output,session) {
                            method = "VPB",
                            nsim   = as.numeric(input$nsimVPB)
                            )[['bisection']][['final']]
+          })
         }else{
           mult(TRUE)
-          SS <- SampleSize.wrap(k      = k,
+          SS <- withProgress(message = 'Computing', style = 'notification', value = 0, {
+            SampleSize.wrap(k      = k,
                                 rho    = rhoA,
                                 rho.0  = rho0,
                                 R      = R,
@@ -333,7 +348,7 @@ server <- function(input,output,session) {
                                 method = "VPB",
                                 nsim   = as.numeric(input$nsimVPB),
                                 reps   = as.numeric(input$repeatsVPB) 
-          )
+          )})
           
         }
         
