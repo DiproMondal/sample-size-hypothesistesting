@@ -1,5 +1,8 @@
 source("ssfuns.R", local = TRUE, echo = FALSE)
-
+if (!requireNamespace("bslib", quietly = TRUE)) {
+  install.packages("bslib")
+}
+library(bslib)
 ui <- navbarPage(
   title = em("Sample Size App"),
   tabsetPanel(id="tabs",type = "tabs",
@@ -170,7 +173,88 @@ ui <- navbarPage(
                          ) 
                        ))
                        
-              )
+              ),
+            tabPanel(
+              title = strong("Help"),
+              mainPanel(h2("Steps to determine sample size"),
+                        HTML("
+      <ul>
+        <li><i><b>Step 1 </b></i> - Select an appropriate confidence interval method under 
+  <a href='#' onclick=\"Shiny.setInputValue('switchTab', 'Choice of confidence interval method'); return false;\"><b>Choice of confidence interval method</b></a>. 
+  Use the <i><b>table</i></b> below as a guide for choosing the confidence interval method.</li> 
+        <li><i><b>Step 2 </b></i> - Specify the maximum number of raters available for the study under 'Number of Raters' in <a href='#' onclick=\"Shiny.setInputValue('switchTab', 'Sample Size Calculation'); return false;\"><b>Sample Size Calculation</b></a>.</li>
+        <li><i><b>Step 3 </b></i> - Set the expected value for the ICC for agreement under the null and alternative hypothesis under 'Value for ICC for agreement under null hypothesis' and 'Value for ICC for agreement under alternative hypothesis' respectively.</li>
+        <li><i><b>Step 4 </b></i> - Set the rater to error variance ratio under 'Rater to error variance ratio'.<i>Note that this value should be used for selecting the confidence interval method.</i></li>
+        <li><i><b>Step 5 </b></i> - Set the target power for the hypothesis test under 'Target power for the hypothesis test'.</li>
+        <li><i><b>Step 6 </b></i> - Set required confidence level under 'Confidence level'.</li>
+        <li><i>(Optional) <b>Step 7 </b></i> -  Set the minimum and maximum  number of participants for the study under 'Acceptable minimum number of participants' and 'Acceptable maximum number of participants', respectively.</li>
+      </ul>
+    ")),
+              mainPanel(HTML("
+<table border='1' style='border-collapse: collapse; width: 100%;'>
+  <tr>
+    <th>Settings</th>
+    <th>Recommended confidence interval methods</th>
+  </tr>
+  <tr>
+    <td>R ≤ 0.1, 2 ≤ k ≤ 4</td>
+    <td><i>VP<sub>B</sub></i>, <i>VP<sub>F</sub></i>, <i>W<sub>mat</sub></i></td>
+  </tr>
+  <tr>
+    <td>R ≤ 0.1, k ≥ 5</td>
+    <td><i>VP<sub>B</sub></i>, <i>W<sub>mat</sub></i></td>
+  </tr>
+  <tr>
+    <td>0.1 < R ≤ 0.2, 2 ≤ k ≤ 4</td>
+    <td><i>MLS<sub>A</sub></i></td>
+  </tr>
+  <tr>
+    <td>0.1 < R ≤ 0.2, 4 < k ≤ 8</td>
+    <td><i>MLS<sub>G</sub></i></td>
+  </tr>
+  <tr>
+    <td>0.1 < R ≤ 0.2, k ≥ 8</td>
+    <td><i>MLS<sub>G</sub></i>, <i>W<sub>mat</sub></i></td>
+  </tr>
+  <tr>
+    <td>0.2 < R ≤ 0.6, 2 ≤ k ≤ 4</td>
+    <td><i>MLS<sub>G</sub></i></td>
+  </tr>
+  <tr>
+    <td>0.2 < R ≤ 0.6, k ≥ 5</td>
+    <td><i>MLS<sub>G</sub></i>, <i>GCI</i></td>
+  </tr>
+  <tr>
+    <td>R > 0.6, k > 2</td>
+    <td><i>MLS<sub>A</sub></i>, <i>MLS<sub>G</sub></i>, <i>GCI</i></td>
+  </tr>
+</table>
+<br>
+<strong>Note:</strong> 'R' is the value of rater-to-error variance ratio, and 'k' is the maximum number of raters available for the study. <br>
+<i>W<sub>mat</sub></i>: Delta method and matrix formulation <br>
+<i>MLS<sub>A</sub></i>: Modified large sample based on a transformation of the ICC <br>
+<i>MLS<sub>G</sub></i>: Modified large sample based on ratios of variance components <br>
+<i>GCI</i>: Generalized confidence interval <br>
+<i>VP<sub>F</sub></i>: Variance partitioning confidence interval using an F-distribution <br>
+<i>VP<sub>B</sub></i>: Variance partitioning confidence interval using a beta-distribution
+")),
+              mainPanel(h2("Steps to keep in mind"),HTML("
+      <ul>
+        <li><h4>Generalized Confidence Interval:</h4><p>The construction of confidence interval method <i>GCI</i> uses simulations.
+        Therefore, it is time consuming. The sample size determination using <i>GCI</i> requires simulations on top of these simulations.
+        So, two sets of simulation parameters need to be defined, to be specified under 'Number of simulations to calculate confidence interval (using Rao-Blackwellization)',
+        and 'Number of simulations to calculate the power', to calculate the confidence interval and to determine sample size, respectively.</p></li>
+        <li><h4>Maximum number of participants</h4><p>If the estimate of the sample size procedure returns the maximum number of participants
+        defined under 'Acceptable maximum number of participants', please increase the value of that parameter setting and rerun the procedure.</p></li>
+        <li><h4>Stability Issues:</h4><p>Sample sizes using confidence interval methods MLS<sub>A</sub>, MLS<sub>G</sub>, GCI, and VP<sub>F</sub> are simulation based.
+        The number of simulations dictate the accuracy of the sample size determination procedure. Therefore, it is recommended to repeat the sample size
+        procedure using atleast 1000 simulations several times to see the variance of the resulting sample size estimates.</p><p>If the variance of the sample size
+        estimates increases when increasing the number of repeats, a sample size for the parameter settings may not be possible. It is then recommended to 
+        change parameter settings. In other cases, a sample siz is possible and the final estimate can be obtained using a larger number of simulations, for example,
+        using 10,000 simulations.</p></li>
+      </ul>
+    "))
+            )
   ) ## close tabsetPanel
 ) ## close navbarpage
 
@@ -192,6 +276,7 @@ server <- function(input,output,session) {
       
 
       if(input$CIMet == 'Delta method and matrix formulation'){
+        mult(FALSE)
         SS <- withProgress(message = 'Computing', style = 'notification', value = 0, {
           SampleSize(k      = k,
                          rho    = rhoA,
@@ -305,6 +390,7 @@ server <- function(input,output,session) {
         }
         
       }else if(input$CIMet == 'Variance partitioning confidence interval using an F-distribution'){
+        mult(FALSE)
         SS <- withProgress(message = 'Computing', style = 'notification', value = 0, {
           SampleSize(k      = k,
                          rho    = rhoA,
@@ -380,13 +466,21 @@ server <- function(input,output,session) {
     res <- sample_size_calculation()
     
     output$sampleSizeTable <- renderTable({ 
-      data.frame("&#961;A"=res$rhoA,
-                 "&#961;0"=res$rho0,
-                 "R"=res$R,
-                 "Power"=res$power,
-                 "n"=as.integer(res$SSmode),
-                 "k"=as.integer(res$k),
-                 check.names = FALSE)
+      table_data <- data.frame(
+        "&#961;A" = res$rhoA,
+        "&#961;0" = res$rho0,
+        "R" = res$R,
+        "Power" = res$power,
+        "n" = as.integer(res$SSmode),
+        "k" = as.integer(res$k),
+        check.names = FALSE
+      )
+      
+      if (res$mult() == "TRUE") {
+        table_data[['Variance(n)']]<- var(res$SS, na.rm = TRUE)
+      }
+      
+      table_data
     },
     sanitize.text.function = function(x) x,
     rownames = FALSE)
@@ -412,7 +506,14 @@ server <- function(input,output,session) {
     output$Qprint <- renderUI({
       column(6, offset =2, 
          h3("Estimated Quantities"),
-         tableOutput("Ests"))
+         tableOutput("Ests"),
+         bsTooltip(id = "rho",  "ICC for agreement (specified value)", placement = "right"),
+         bsTooltip(id = "RD", "Ratio of rater to error variance (specified value)", placement = "right"),
+         bsTooltip(id = "MSS",  "Mean Squares between participants", placement = "right"),
+         bsTooltip(id = "MSR", "Mean Squares between raters", placement = "right"),
+         bsTooltip(id = "MSE", "Mean Square Error", placement = "right"),
+         bsTooltip(id = "ICC", "Estimated ICC for agreement", placement = "right"),
+         bsTooltip(id = "Rh", "Estimated ratio of rater to error variance", placement = "right"))
     })
     output$collapsibleContent <- renderUI({
         tags$div(
@@ -504,21 +605,44 @@ server <- function(input,output,session) {
     }
     res2(MC_sim())
     
-    output$Ests <- renderTable({ 
-      data.frame(
-        "&#961;<span title='ICC for agreement (specified value)'>[?]</span>" = as.numeric(input$rho1),
-        "R<span title='Ratio of rater to error variance (specified value)'>[?]</span>" = as.numeric(input$R),
-        "E[MSS]<span title='Mean Squares between participants'>[?]</span>" = mean(res2()$MSS),
-        "E[MSR]<span title='Mean Squares between raters'>[?]</span>" = mean(res2()$MSR),
-        "E[MSE]<span title='Mean Square Error'>[?]</span>" = mean(res2()$MSE),
-        "E[&#710;&#961]<span title='Estimated ICC for agreement (two-way ANOVA without repititions)'>[?]</span>" = mean(res2()$ICC),
-        check.names = FALSE
-      )
-    },
-    escape = FALSE,
-    sanitize.text.function = identity,
-    rownames = FALSE)
-    
+    #output$Ests <- renderTable({ 
+    #  data.frame(
+    #    "&#961;<span title='ICC for agreement (specified value)'>[?]</span>" = as.numeric(input$rho1),
+    #    "R<span title='Ratio of rater to error variance (specified value)'>[?]</span>" = as.numeric(input$R),
+    #    "E[MSS]<span title='Mean Squares between participants'>[?]</span>" = mean(res2()$MSS),
+    #    "E[MSR]<span title='Mean Squares between raters'>[?]</span>" = mean(res2()$MSR),
+    #    "E[MSE]<span title='Mean Square Error'>[?]</span>" = mean(res2()$MSE),
+    #    "E[&#710;&#961]<span title='Estimated ICC for agreement (two-way ANOVA without repititions)'>[?]</span>" = mean(res2()$ICC),
+    #    check.names = FALSE
+    #  )
+    #},
+    #escape = FALSE,
+    #sanitize.text.function = identity,
+    #rownames = FALSE)
+    output$Ests <- renderUI({
+      HTML("
+      <table border='1' style='border-collapse: collapse; width: 100%;'>
+        <tr>
+          <th id='rho'>&#961;</th>
+          <th id='RD'>R</th>
+          <th id='MSS'>E[MSS]</th>
+          <th id='MSR'>E[MSR]</th>
+          <th id='MSE'>E[MSE]</th>
+          <th id='ICC'>E[&#710;&#961;]</th>
+          <th id='Rh'>E[&#710;R]</th>
+        </tr>
+        <tr>
+          <td>" , as.numeric(input$rho1), "</td>
+          <td>" , as.numeric(input$R), "</td>
+          <td>" , round(mean(res2()$MSS),3), "</td>
+          <td>" , round(mean(res2()$MSR),3), "</td>
+          <td>" , round(mean(res2()$MSE),3), "</td>
+          <td>" , round(mean(res2()$ICC),3), "</td>
+          <td>" , round((mean(res2()$MSR)-mean(res2()$MSE))/as.numeric(input$np)/mean(res2()$MSR),3), "</td>
+        </tr>
+      </table>
+    ")
+    })
     
     
     output$ICCest <- renderPlot({
