@@ -179,10 +179,8 @@ ui <- navbarPage(
               mainPanel(h2("Steps to determine sample size"),
                         HTML("
       <ul>
-        <li><i><b>Step 1 </b></i> - Select an appropriate confidence interval method under 
-  <a href='#' onclick=\"Shiny.setInputValue('switchTab', 'Choice of confidence interval method'); return false;\"><b>Choice of confidence interval method</b></a>. 
-  Use the <i><b>table</i></b> below as a guide for choosing the confidence interval method.</li> 
-        <li><i><b>Step 2 </b></i> - Specify the maximum number of raters available for the study under 'Number of Raters' in <a href='#' onclick=\"Shiny.setInputValue('switchTab', 'Sample Size Calculation'); return false;\"><b>Sample Size Calculation</b></a>.</li>
+        <li><i><b>Step 1 </b></i> - Select an appropriate confidence interval method under 'Choose Method' in the <u><b>'Choice of confidence interval method'</b></u>. Use the <i><b>table</i></b> below as a guide for choosing the confidence interval method. </li>
+        <li><i><b>Step 2 </b></i> - Specify the maximum number of raters available for the study under 'Number of Raters' in <u><b>'Sample Size Calculation'</u></b>.</li>
         <li><i><b>Step 3 </b></i> - Set the expected value for the ICC for agreement under the null and alternative hypothesis under 'Value for ICC for agreement under null hypothesis' and 'Value for ICC for agreement under alternative hypothesis' respectively.</li>
         <li><i><b>Step 4 </b></i> - Set the rater to error variance ratio under 'Rater to error variance ratio'.<i>Note that this value should be used for selecting the confidence interval method.</i></li>
         <li><i><b>Step 5 </b></i> - Set the target power for the hypothesis test under 'Target power for the hypothesis test'.</li>
