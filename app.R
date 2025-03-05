@@ -185,7 +185,7 @@ ui <- navbarPage(
         <li><i><b>Step 3 </b></i> - Set the expected value for the ICC for agreement under the null and alternative hypothesis under 'Value for ICC for agreement under null hypothesis' and 'Value for ICC for agreement under alternative hypothesis' respectively.</li>
         <li><i><b>Step 4 </b></i> - Set the rater to error variance ratio under 'Rater to error variance ratio'.<i>Note that this value should be used for selecting the confidence interval method.</i></li>
         <li><i><b>Step 5 </b></i> - Set the target power for the hypothesis test under 'Target power for the hypothesis test'.</li>
-        <li><i><b>Step 6 </b></i> - Set required confidence level under 'Confidence level'.</li>
+        <li><i>(Optional) <b>Step 6 </b></i> - Set required confidence level under 'Confidence level'.</li>
         <li><i>(Optional) <b>Step 7 </b></i> -  Set the minimum and maximum  number of participants for the study under 'Acceptable minimum number of participants' and 'Acceptable maximum number of participants', respectively.</li>
       </ul>
     ")),
@@ -196,7 +196,23 @@ ui <- navbarPage(
     <th>Recommended confidence interval methods</th>
   </tr>
   <tr>
-    <td>R ≤ 0.1, 2 ≤ k ≤ 4</td>
+    <td>R ≤ 0.1, k = 2</td>
+    <td><i>VP<sub>F</sub></i></td>
+  </tr>
+  <tr>
+    <td>0.1 < R ≤ 0.9, k = 2</td>
+    <td><i>MLS<sub>A</sub></i></td>
+  </tr>
+  <tr>
+    <td>0.9 < R ≤ 1.0, k = 2</td>
+    <td><i>MLS<sub>A</sub></i>, <i>MLS<sub>G</sub></i></td>
+  </tr>
+  <tr>
+    <td>R > 1.0, k = 2</td>
+    <td><i>MLS<sub>A</sub></i>, <i>MLS<sub>G</sub></i>, <i>GCI</i></td>
+  </tr>
+  <tr>
+    <td>R ≤ 0.1, 2 < k ≤ 4</td>
     <td><i>VP<sub>B</sub></i>, <i>VP<sub>F</sub></i></td>
   </tr>
   <tr>
@@ -204,7 +220,7 @@ ui <- navbarPage(
     <td><i>VP<sub>B</sub></i>, <i>W<sub>mat</sub></i></td>
   </tr>
   <tr>
-    <td>0.1 < R ≤ 0.2, 2 ≤ k ≤ 4</td>
+    <td>0.1 < R ≤ 0.2, 2 < k ≤ 4</td>
     <td><i>MLS<sub>A</sub></i></td>
   </tr>
   <tr>
@@ -216,7 +232,7 @@ ui <- navbarPage(
     <td><i>MLS<sub>G</sub></i>, <i>W<sub>mat</sub></i></td>
   </tr>
   <tr>
-    <td>0.2 < R ≤ 0.6, 2 ≤ k ≤ 4</td>
+    <td>0.2 < R ≤ 0.6, 2 < k ≤ 4</td>
     <td><i>MLS<sub>G</sub></i></td>
   </tr>
   <tr>
