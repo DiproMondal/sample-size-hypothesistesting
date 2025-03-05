@@ -197,7 +197,7 @@ ui <- navbarPage(
   </tr>
   <tr>
     <td>R ≤ 0.1, 2 ≤ k ≤ 4</td>
-    <td><i>VP<sub>B</sub></i>, <i>VP<sub>F</sub></i>, <i>W<sub>mat</sub></i></td>
+    <td><i>VP<sub>B</sub></i>, <i>VP<sub>F</sub></i></td>
   </tr>
   <tr>
     <td>R ≤ 0.1, k ≥ 5</td>
