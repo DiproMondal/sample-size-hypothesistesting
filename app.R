@@ -180,7 +180,7 @@ ui <- navbarPage(
               mainPanel(h2("Steps to determine sample size"),
                         HTML("
       <ul>
-        <li><i><b>Step 1 </b></i> - Select an appropriate confidence interval method under 'Choose Method' in the <u><b>'Choice of confidence interval method'</b></u>. Use the <i><b>table</i></b> below as a guide for choosing the confidence interval method. </li>
+        <li><i><b>Step 1 </b></i> - Select an appropriate confidence interval method under 'Choose Method' in the <u><b>'Choice of confidence interval method'</b></u>. Use the <i><b>Recommendation table</i></b> below as a guide for choosing the confidence interval method. </li>
         <li><i><b>Step 2 </b></i> - Specify the maximum number of raters available for the study under 'Number of Raters' in <u><b>'Sample Size Calculation'</u></b>.</li>
         <li><i><b>Step 3 </b></i> - Set the expected value for the ICC for agreement under the null and alternative hypothesis under 'Value for ICC for agreement under null hypothesis' and 'Value for ICC for agreement under alternative hypothesis' respectively.</li>
         <li><i><b>Step 4 </b></i> - Set the rater to error variance ratio under 'Rater to error variance ratio'.<i>Note that this value should be used for selecting the confidence interval method.</i></li>
@@ -189,7 +189,8 @@ ui <- navbarPage(
         <li><i>(Optional) <b>Step 7 </b></i> -  Set the minimum and maximum  number of participants for the study under 'Acceptable minimum number of participants' and 'Acceptable maximum number of participants', respectively.</li>
       </ul>
     ")),
-              mainPanel(HTML("
+              mainPanel(h3("Recommendation Table"),
+              HTML("
 <table border='1' style='border-collapse: collapse; width: 100%;'>
   <tr>
     <th>Settings</th>
@@ -253,6 +254,21 @@ ui <- navbarPage(
 <i>VP<sub>F</sub></i>: Variance partitioning confidence interval using an F-distribution <br>
 <i>VP<sub>B</sub></i>: Variance partitioning confidence interval using a beta-distribution
 ")),
+              mainPanel(h2("Recommended Confidence Interval"),
+                        fluidRow(
+                column(3, 
+                       numericInput("Rvl", "Enter R:", 
+                                    value = 0.1, min = 0.001, max = 100, step = 0.001)
+                ),
+                column(3, 
+                       numericInput("kvl", "Enter k:", 
+                                    value = 2, min = 2, max = 100, step = 1)
+                ),
+                column(8,
+                       h4("Recommended Methods:"),
+                       textOutput("rcmm")
+                )
+              )),
               mainPanel(h2("Steps to keep in mind"),HTML("
       <ul>
         <li><h4>Generalized Confidence Interval:</h4><p>The construction of confidence interval method <i>GCI</i> uses simulations.
@@ -278,6 +294,48 @@ ui <- navbarPage(
 
 server <- function(input,output,session) {
   res2 <- reactiveVal(NULL)
+
+  
+  output$rcmm <- renderText({
+    Rvl <- input$Rvl
+    kvl <- input$kvl
+    
+    # Define conditions based on the table using full descriptions
+    recommendation <- if (Rvl <= 0.1 && kvl == 2) {
+      HTML("Variance partitioning confidence interval using an F-distribution")
+    } else if (Rvl > 0.1 && Rvl <= 0.9 && kvl == 2) {
+      HTML("Modified large sample based on a transformation of the ICC")
+    } else if (Rvl > 0.9 && Rvl <= 1.0 && kvl == 2) {
+      HTML("Modified large sample based on a transformation of the ICC, Modified large sample based on ratios of variance components")
+    } else if (Rvl > 1.0 && kvl == 2) {
+      HTML("Modified large sample based on a transformation of the ICC, Modified large sample based on ratios of variance components, Generalized confidence interval")
+    } else if (Rvl <= 0.1 && kvl >= 2 && kvl <= 4) {
+      HTML("Variance partitioning confidence interval using a beta-distribution, Variance partitioning confidence interval using an F-distribution")
+    } else if (Rvl <= 0.1 && kvl >= 5) {
+      HTML("Variance partitioning confidence interval using a beta-distribution, Delta method and matrix formulation")
+    } else if (Rvl > 0.1 && Rvl <= 0.2 && kvl >= 2 && kvl <= 4) {
+      HTML("Modified large sample based on a transformation of the ICC")
+    } else if (Rvl > 0.1 && Rvl <= 0.2 && kvl > 4 && kvl <= 8) {
+      HTML("Modified large sample based on ratios of variance components")
+    } else if (Rvl > 0.1 && Rvl <= 0.2 && kvl >= 8) {
+      HTML("Modified large sample based on ratios of variance components, Delta method and matrix formulation")
+    } else if (Rvl > 0.2 && Rvl <= 0.6 && kvl >= 2 && kvl <= 4) {
+      HTML("Modified large sample based on ratios of variance components")
+    } else if (Rvl > 0.2 && Rvl <= 0.6 && kvl >= 5) {
+      HTML("Modified large sample based on ratios of variance components, Generalized confidence interval")
+    } else if (Rvl > 0.6 && kvl > 2) {
+      HTML("Modified large sample based on a transformation of the ICC, \nModified large sample based on ratios of variance components, \nGeneralized confidence interval")
+    } else {
+      HTML("No recommended method found for these values.")
+    }
+    
+    return(recommendation)
+  })
+  
+  
+  
+  
+  
 
   observeEvent(input$computeSS, {
     sample_size_calculation <- function(){
