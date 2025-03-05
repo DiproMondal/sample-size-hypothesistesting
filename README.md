@@ -4,8 +4,9 @@ This repository contains a R/Shiny app to obtain sample sizes for the ICC for ag
 ### To run the code you would need 
  1. an installation of R (https://cran.r-project.org/bin/windows/base/)
  2. with a shiny library (install.packages("shiny"))
- 3. library extraDistr (install.packages("extraDistr")), and
- 4. library bslib (install.packages("bslib"))
+ 3. library shinyBS (install.packages("shinyBS")), and
+ 4. library extraDistr (install.packages("extraDistr"))
+
 
 
 Then run this code:
