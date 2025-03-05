@@ -244,13 +244,16 @@ ui <- navbarPage(
         So, two sets of simulation parameters need to be defined, to be specified under 'Number of simulations to calculate confidence interval (using Rao-Blackwellization)',
         and 'Number of simulations to calculate the power', to calculate the confidence interval and to determine sample size, respectively.</p></li>
         <li><h4>Maximum number of participants</h4><p>If the estimate of the sample size procedure returns the maximum number of participants
-        defined under 'Acceptable maximum number of participants', please increase the value of that parameter setting and rerun the procedure.</p></li>
+        defined under 'Acceptable maximum number of participants', please increase the value of that parameter setting and rerun the procedure.
+        If increasing the 'Acceptable maximum number of participants' does not help sample size determination may not be possible for the 
+        parameter settings - see Stability Issues for further help.</p></li>
         <li><h4>Stability Issues:</h4><p>Sample sizes using confidence interval methods MLS<sub>A</sub>, MLS<sub>G</sub>, GCI, and VP<sub>F</sub> are simulation based.
         The number of simulations dictate the accuracy of the sample size determination procedure. Therefore, it is recommended to repeat the sample size
         procedure using atleast 1000 simulations several times to see the variance of the resulting sample size estimates.</p><p>If the variance of the sample size
         estimates increases when increasing the number of repeats, a sample size for the parameter settings may not be possible. It is then recommended to 
-        change parameter settings. In other cases, a sample siz is possible and the final estimate can be obtained using a larger number of simulations, for example,
-        using 10,000 simulations.</p></li>
+        change parameter settings (for example, increasing the number of raters, and/or, decreasing the rater-to-error variance ratio, and/or
+        decreasing the value of the ICC under null hypothesis, and/or, decreasing the target power). In other cases, a sample size is possible for the parameter settings
+        and the final estimate can be obtained using a larger number of simulations, for example, using 10,000 simulations.</p></li>
       </ul>
     "))
             )
