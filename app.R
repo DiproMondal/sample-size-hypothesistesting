@@ -1,8 +1,9 @@
 source("ssfuns.R", local = TRUE, echo = FALSE)
-if (!requireNamespace("bslib", quietly = TRUE)) {
-  install.packages("bslib")
-}
-library(bslib)
+if (!require("shinyBS")) 
+  install.packages("shinyBS")
+library(shinyBS)
+
+
 ui <- navbarPage(
   title = em("Sample Size App"),
   tabsetPanel(id="tabs",type = "tabs",
@@ -505,13 +506,14 @@ server <- function(input,output,session) {
       column(6, offset =2, 
          h3("Estimated Quantities"),
          tableOutput("Ests"),
-         bsTooltip(id = "rho",  "ICC for agreement (specified value)", placement = "right"),
+         bsTooltip(id = "rho", "ICC for agreement (specified value)", placement = "right"),
          bsTooltip(id = "RD", "Ratio of rater to error variance (specified value)", placement = "right"),
-         bsTooltip(id = "MSS",  "Mean Squares between participants", placement = "right"),
+         bsTooltip(id = "MSS", "Mean Squares between participants", placement = "right"),
          bsTooltip(id = "MSR", "Mean Squares between raters", placement = "right"),
          bsTooltip(id = "MSE", "Mean Square Error", placement = "right"),
          bsTooltip(id = "ICC", "Estimated ICC for agreement", placement = "right"),
-         bsTooltip(id = "Rh", "Estimated ratio of rater to error variance", placement = "right"))
+         bsTooltip(id = "Rh", "Estimated ratio of rater to error variance", placement = "right")
+           )
     })
     output$collapsibleContent <- renderUI({
         tags$div(
@@ -603,22 +605,25 @@ server <- function(input,output,session) {
     }
     res2(MC_sim())
     
-    #output$Ests <- renderTable({ 
-    #  data.frame(
-    #    "&#961;<span title='ICC for agreement (specified value)'>[?]</span>" = as.numeric(input$rho1),
-    #    "R<span title='Ratio of rater to error variance (specified value)'>[?]</span>" = as.numeric(input$R),
-    #    "E[MSS]<span title='Mean Squares between participants'>[?]</span>" = mean(res2()$MSS),
-    #    "E[MSR]<span title='Mean Squares between raters'>[?]</span>" = mean(res2()$MSR),
-    #    "E[MSE]<span title='Mean Square Error'>[?]</span>" = mean(res2()$MSE),
-    #    "E[&#710;&#961]<span title='Estimated ICC for agreement (two-way ANOVA without repititions)'>[?]</span>" = mean(res2()$ICC),
-    #    check.names = FALSE
-    #  )
-    #},
-    #escape = FALSE,
-    #sanitize.text.function = identity,
-    #rownames = FALSE)
-    output$Ests <- renderUI({
-      HTML("
+    #if (bslib_av==FALSE) {
+    #  output$Ests <- renderTable({ 
+     #   data.frame(
+    #      "&#961;" = as.numeric(input$rho1),
+     #     "R" = as.numeric(input$R),
+     #     "E[MSS]" = mean(res2()$MSS),
+    #      "E[MSR]" = mean(res2()$MSR),
+    #      "E[MSE]" = mean(res2()$MSE),
+    #      "E[&#710;&#961]" = mean(res2()$ICC),
+    #      "E[&#710;R]"  =(mean(res2()$MSR) - mean(res2()$MSE)) / as.numeric(input$np) / mean(res2()$MSR),
+    #      check.names = FALSE
+    #    )
+    #  },
+    #  escape = FALSE,
+     # sanitize.text.function = identity,
+    #  rownames = FALSE)
+    #} else {
+      output$Ests <- renderUI({
+        HTML(paste0("
       <table border='1' style='border-collapse: collapse; width: 100%;'>
         <tr>
           <th id='rho'>&#961;</th>
@@ -630,17 +635,17 @@ server <- function(input,output,session) {
           <th id='Rh'>E[&#710;R]</th>
         </tr>
         <tr>
-          <td>" , as.numeric(input$rho1), "</td>
-          <td>" , as.numeric(input$R), "</td>
-          <td>" , round(mean(res2()$MSS),3), "</td>
-          <td>" , round(mean(res2()$MSR),3), "</td>
-          <td>" , round(mean(res2()$MSE),3), "</td>
-          <td>" , round(mean(res2()$ICC),3), "</td>
-          <td>" , round((mean(res2()$MSR)-mean(res2()$MSE))/as.numeric(input$np)/mean(res2()$MSR),3), "</td>
+          <td>", as.numeric(input$rho1), "</td>
+          <td>", as.numeric(input$R), "</td>
+          <td>", round(mean(res2()$MSS), 3), "</td>
+          <td>", round(mean(res2()$MSR), 3), "</td>
+          <td>", round(mean(res2()$MSE), 3), "</td>
+          <td>", round(mean(res2()$ICC), 3), "</td>
+          <td>", round((mean(res2()$MSR) - mean(res2()$MSE)) / as.numeric(input$np) / mean(res2()$MSR), 3), "</td>
         </tr>
       </table>
-    ")
-    })
+    "))
+      })
     
     
     output$ICCest <- renderPlot({
