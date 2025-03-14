@@ -525,8 +525,9 @@ server <- function(input,output,session) {
 
       return(list(SS   = SS,
                   SSmode = if(mult()=="TRUE"){
+                    mean(SS)
                     #as.numeric(names(sort(table(SS), decreasing = TRUE))[1]) ## Mode
-                    sum(sapply(1:length(table(SS)), function(x) table(SS)[[x]]*as.integer(names(table(SS))[x])))/sum(table(SS))## Weighted mean
+                    #sum(sapply(1:length(table(SS)), function(x) table(SS)[[x]]*as.integer(names(table(SS))[x])))/sum(table(SS))## Weighted mean
                   }else{
                     SS
                     },
